@@ -1,0 +1,9 @@
+*.pyc
+*.py~
+.ipynb_checkpoints
+*.egg-info
+*.p
+*.npy
+__pycache__/
+MUJOCO_LOG.TXT
+results/
