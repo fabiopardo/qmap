@@ -4,7 +4,7 @@ Goal-oriented learning has become a core concept in reinforcement learning (RL),
 
 The paper can be found on [arXiv](https://arxiv.org/abs/1810.02927) while videos are available on [the website](https://sites.google.com/view/q-map-rl).
 
-<img src="data/mario_montezuma.gif" width=40% align="center"/>
+<p align="center"> <img src="data/mario_montezuma.gif" width=40%/> </p>
 
 ## Installation
 
