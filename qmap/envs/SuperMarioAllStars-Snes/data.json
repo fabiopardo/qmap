@@ -1,0 +1,48 @@
+{
+  "info": {
+    "Dead": {
+      "address": 1827,
+      "type": "|u1"
+    },
+    "MarioPosX_Abs_total": {
+      "address": 228,
+      "type": "<u2"
+    },
+    "MarioX_H": {
+      "address": 120,
+      "type": "|u1"
+    },
+    "MarioX_L": {
+      "address": 537,
+      "type": "|u1"
+    },
+    "MarioY": {
+      "address": 3999,
+      "type": "|u1"
+    },
+    "RelativeMarioX": {
+      "address": 941,
+      "type": "|u1"
+    },
+    "Score": {
+      "address": 1993,
+      "type": ">n6"
+    },
+    "ScreenX_H": {
+      "address": 66,
+      "type": "|u1"
+    },
+    "ScreenX_L": {
+      "address": 67,
+      "type": "|u1"
+    },
+    "Sliding_Screen_Abs_Pos": {
+      "address": 66,
+      "type": "<u2"
+    },
+    "Time": {
+      "address": 2024,
+      "type": ">n4"
+    }
+  }
+}

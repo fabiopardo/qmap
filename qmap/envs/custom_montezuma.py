@@ -1,10 +1,11 @@
-import atari_py
 from collections import deque
 import gym
 from gym import Env, spaces, utils
 from gym.utils import seeding
 import numpy as np
 from scipy.misc import imresize
+
+from qmap.utils.lazy_frames import LazyFrames
 
 
 actions = {
@@ -29,40 +30,6 @@ actions = {
 }
 
 
-class Spec:
-    def __init__(self, id):
-        self.id = id
-
-
-class LazyFrames(object):
-    def __init__(self, frames):
-        self._frames = frames
-        self._out = None
-
-    def _force(self):
-        if self._out is None:
-            self._out = np.concatenate(self._frames, axis=2)
-            self._frames = None
-        return self._out
-
-    def __array__(self, dtype=None):
-        out = self._force()
-        if dtype is not None:
-            out = out.astype(dtype)
-        return out
-
-    def __len__(self):
-        return len(self._force())
-
-    def __getitem__(self, i):
-        return self._force()[i]
-
-    @property
-    def shape(self):
-        shape = self._frames[0].shape
-        return (shape[0], shape[1], shape[2] * len(self._frames))
-
-
 class CustomMontezumaEnv(Env, utils.EzPickle):
     metadata = {'render.modes': ['human', 'rgb_array']}
 
@@ -70,41 +37,40 @@ class CustomMontezumaEnv(Env, utils.EzPickle):
         utils.EzPickle.__init__(self, 'montezuma_revenge', 'image')
         self.env = gym.make('MontezumaRevengeNoFrameskip-v4').unwrapped
         self.ale = self.env.ale
-        # self.game_path = atari_py.get_game_path('montezuma_revenge')
-        # self.ale = atari_py.ALEInterface()
         self.ale.setFloat('repeat_action_probability'.encode('utf-8'), 0) # deterministic
         self.max_lives = self.ale.lives()
-        self.seed()
+        # observations
         self.screen_ratio = screen_ratio
-        self.coords_ratio = coords_ratio
-        assert coords_ratio % screen_ratio == 0, (coords_ratio, screen_ratio)
-        self.coords_screen_ratio = coords_ratio // screen_ratio
+        self.original_height = 224
+        self.original_width = 160
+        self.screen_height = self.original_height // screen_ratio
+        self.screen_width = self.original_width // screen_ratio
+        self.screen_shape = (self.screen_height, self.screen_width)
         self.use_color = use_color
         self.use_rc_frame = use_rc_frame
         self.stack = stack
         self.frame_skip = frame_skip
+        n_frames = stack * (3 * use_color + 1 * (not use_color) + use_rc_frame)
+        self.frames = deque([], maxlen=(self.frame_skip * (self.stack - 1) + 1))
+        self.observation_space = spaces.Box(low=0, high=255, shape=(self.screen_height, self.screen_width, n_frames))
+        # coordinates
+        self.coords_ratio = coords_ratio
+        assert coords_ratio % screen_ratio == 0, (coords_ratio, screen_ratio)
+        self.coords_screen_ratio = coords_ratio // screen_ratio
+        self.coords_height = self.original_height // coords_ratio
+        self.coords_width = self.original_width // coords_ratio
+        self.coords_shape = (self.coords_height, self.coords_width)
+        # actions
         self.action_repeat = action_repeat
         self.action_names = ['LEFTFIRE', 'UP', 'RIGHTFIRE', 'LEFT', 'NOOP', 'RIGHT', 'DOWN']
         self.action_list = [actions[n] for n in self.action_names]
         n_actions = len(self.action_list)
         self.action_space = spaces.Discrete(n_actions)
-        self.original_height = 224
-        self.original_width = 160
-        self.screen_height = self.original_height // screen_ratio
-        self.screen_width = self.original_width // screen_ratio
-        self.screen_size = self.screen_height * self.screen_width
-        self.screen_shape = (self.screen_height, self.screen_width)
-        self.coords_height = self.original_height // coords_ratio
-        self.coords_width = self.original_width // coords_ratio
-        self.coords_shape = (self.coords_height, self.coords_width)
-        n_frames = stack * (3 * use_color + 1 * (not use_color) + use_rc_frame)
-        self.frames = deque([], maxlen=(self.frame_skip * (self.stack - 1) + 1))
-        self.observation_space = spaces.Box(low=0, high=255, shape=(self.screen_height, self.screen_width, n_frames))
+        # miscellaneous
         frame_name = 'RGB' if use_color else 'G'
         if use_rc_frame: frame_name += 'C'
-        self.name = 'CustomMontezuma_obs{}x{}x{}x{}_map{}x{}x{}_skip{}_repeat{}-v0'.format(
+        self.name = 'CustomMontezuma_obs{}x{}x{}x{}_qframes{}x{}x{}_skip{}_repeat{}-v0'.format(
             *self.screen_shape, frame_name, stack, *self.coords_shape, n_actions, frame_skip, action_repeat)
-        self.spec = Spec(self.name)
 
     def seed(self, seed=None):
         return self.env.seed(seed)
@@ -132,7 +98,7 @@ class CustomMontezumaEnv(Env, utils.EzPickle):
             if gameover and not done: # died from timeout
                 done = True
             if done: break
-        if rew != 0: print('OMG a reward!!!', rew)
+        if rew != 0: print('OMG a reward!', rew)
         self.frames.append(game_frame)
         game_frames = LazyFrames(list(self.frames)[::self.frame_skip])
         screen = np.zeros((224, 160, 3)) # padding

@@ -6,4 +6,4 @@
 *.npy
 __pycache__/
 MUJOCO_LOG.TXT
-results/
+qmap_results/
