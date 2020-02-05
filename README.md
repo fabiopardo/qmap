@@ -1,6 +1,6 @@
-# Q-map: a Convolutional Approach for Goal-Oriented Reinforcement Learning
+# Scaling All-Goals Updates in Reinforcement Learning Using Convolutional Neural Networks
 
-Goal-oriented learning has become a core concept in reinforcement learning (RL), extending the reward signal as a sole way to define tasks. However, as parameterizing value functions with goals increases the learning complexity, efficiently reusing past experience to update estimates towards several goals at once becomes desirable but usually requires independent updates per goal. Considering that a significant number of RL environments can support spatial coordinates as goals, such as on-screen location of the character in ATARI or SNES games, we propose a novel goal-oriented agent called Q-map that utilizes an autoencoder-like neural network to predict the minimum number of steps towards each coordinate in a single forward pass. This architecture is similar to Horde with parameter sharing and allows the agent to discover correlations between visual patterns and navigation. For example learning how to use a ladder in a game could be transferred to other ladders later. We show how this network can be efficiently trained with a 3D variant of Q-learning to update the estimates towards all goals at once. While the Q-map agent could be used for a wide range of applications, we propose a novel exploration mechanism in place of epsilon-greedy that relies on goal selection at a desired distance followed by several steps taken towards it, allowing long and coherent exploratory steps in the environment. We demonstrate the accuracy and generalization qualities of the Q-map agent on a grid-world environment and then demonstrate the efficiency of the proposed exploration mechanism on the notoriously difficult Montezuma's Revenge and Super Mario All-Stars games.
+Being able to reach any desired location in the environment can be a valuable asset for an agent. Learning a policy to navigate between all pairs of states individually is often not feasible. An all-goals updating algorithm uses each transition to learn Q-values towards all goals simultaneously and off-policy. However the expensive numerous updates in parallel limited the approach to small tabular cases so far. To tackle this problem we propose to use convolutional network architectures to generate Q-values and updates for a large number of goals at once. We demonstrate the accuracy and generalization qualities of the proposed method on randomly generated mazes and Sokoban puzzles. In the case of on-screen goal coordinates the resulting mapping from frames to distance-maps directly informs the agent about which places are reachable and in how many steps. As an example of application we show that replacing the random actions in epsilon-greedy exploration by several actions towards feasible goals generates better exploratory trajectories on Montezuma's Revenge and Super Mario All-Stars games.
 
 The paper can be found on [arXiv](https://arxiv.org/abs/1810.02927) while videos are available on [the website](https://sites.google.com/view/q-map-rl).
 
@@ -65,10 +65,10 @@ where ```ENV``` is the environment used to pre-train (for example on level 1.1) 
 
 To cite this repository in publications please use:
 ```
-@article{pardo2018qmap,
-  title={Q-map: a Convolutional Approach for Goal-Oriented Reinforcement Learning},
+@inproceedings{pardo2020scaling,
+  title={Scaling All-Goals Updates in Reinforcement Learning Using Convolutional Neural Networks},
   author={Pardo, Fabio and Levdik, Vitaly and Kormushev, Petar},
-  journal={arXiv preprint arXiv:1810.02927},
-  year={2018}
+  booktitle={Thirty-Fourth AAAI Conference on Artificial Intelligence},
+  year={2020}
 }
 ```
